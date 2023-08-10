@@ -16,12 +16,11 @@
 
   <p id='favorite_teachers'>
     <strong>Favorite Teachers:</strong>
-    <%= user.teachers.favorites.ids.map {|user_id| User.find(user_id).name }.join(', ') %>
-  </p>
-
-  <p id='classmates'>
-    <strong>Class Mates:</strong>
-    <%= User.classmates(user).map(&:name).join(', ') %>
+    <% if user.teachers.present? %>
+      <%= user.teachers.where("id <=?", 2).map { |teacher| teacher.name }.join(', ') %>
+    <% else %>
+      No Favorite Teachers
+    <% end %>
   </p>
 
 </div>

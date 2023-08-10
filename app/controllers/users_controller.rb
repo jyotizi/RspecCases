@@ -16,7 +16,10 @@ class UsersController < ApplicationController
   end
 
   # GET /users/1/edit
+  
   def edit
+    @user = User.find(params[:id])
+    
   end
 
   # POST /users or /users.json
@@ -36,14 +39,16 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/1 or /users/1.json
   def update
-    respond_to do |format|
-      if @user.update(user_params)
-        format.html { redirect_to user_url(@user), notice: "User was successfully updated." }
-        format.json { render :show, status: :ok, location: @user }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @user.errors, status: :unprocessable_entity }
-      end
+    @user = User.find(params[:id])
+  
+    if (@user.kind == "Teacher" || (@user.kind == "Student" && @user.enrollments.any?))
+      flash[:error] = "Kind cannot be set to Student because the user is teaching in at least one program."
+      redirect_to edit_user_path(@user)
+    elsif @user.update(user_params)
+      flash[:success] = "User updated successfully."
+      redirect_to @user
+    else
+      render :edit
     end
   end
 
@@ -62,6 +67,19 @@ class UsersController < ApplicationController
     def set_user
       @user = User.find(params[:id])
     end
+    
+    # def role_change_not_allowed?
+    #   user_kind = user_params[:kind]
+    #   current_kind = @user.kind
+    #   
+    #   if user_kind == current_kind
+    #     return false 
+    #   elsif (user_kind == "Student" && current_kind == "Teacher")
+    #     return true 
+    #   else  
+    #     return false
+    #   end
+    # end
 
     # Only allow a list of trusted parameters through.
     def user_params

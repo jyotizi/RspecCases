@@ -3,8 +3,6 @@ class CreateUsers < ActiveRecord::Migration[7.0]
     create_table :users do |t|
       t.string :name, null: false
       t.integer :age, null: false
-      t.integer :kind, default: 1, null: false
-
       t.timestamps
     end
   end

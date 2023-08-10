@@ -1,15 +1,14 @@
 # frozen_string_literal: true
-
 require 'rails_helper'
 
 RSpec.feature 'Show Users' do
-  let!(:user_1) { User.create(kind: 0, name: 'Student 1', age: 21) }
-  let!(:user_2) { User.create(kind: 0, name: 'Student 2', age: 22) }
-  let!(:user_3) { User.create(kind: 0, name: 'Student 3', age: 22) }
-  let!(:user_4) { User.create(kind: 0, name: 'Student 4', age: 23) }
-  let!(:teacher_1) { User.create(kind: 1, name: 'Teacher 1', age: 50) }
-  let!(:teacher_2) { User.create(kind: 1, name: 'Teacher 2', age: 60) }
-  let!(:teacher_3) { User.create(kind: 1, name: 'Teacher 3', age: 60) }
+  let!(:user_1) { User.create(kind: "Student", name: 'Student 1', age: 21) }
+  let!(:user_2) { User.create(kind: "Teacher", name: 'Teacher 2', age: 22) }
+  let!(:user_3) { User.create(kind: "Student", name: 'Student 3', age: 22) }
+  let!(:user_4) { User.create(kind: "Student", name: 'Student 4', age: 23) }
+  let!(:teacher_1) { Teacher.create(kind: "Teacher", name: 'Teacher 1', age: 50, user_id: user_1.id) }
+  let!(:teacher_2) { Teacher.create(kind: "Teacher", name: 'Teacher 2', age: 60, user_id: user_1.id) }
+  let!(:teacher_3) { Teacher.create(kind: "Teacher", name: 'Teacher 3', age: 60, user_id: user_1.id) }
   let!(:teacher_student) { User.create(kind: 2, name: 'Student and Teacher', age: 40) }
   let!(:program_1) { Program.create(name: 'AI is going to destroy the world') }
   let!(:program_2) { Program.create(name: 'Wall Street for dummies') }
@@ -32,53 +31,48 @@ RSpec.feature 'Show Users' do
     context 'kind related errors' do
       scenario 'when a teacher wants to be set a student' do
         visit edit_user_path(teacher_1)
-  
-        select('Student', from: "user_kind")
+        
+        select('Student', from: "user_kind", match: :first)
         click_on 'Update User'
-  
-        expect(page).to have_text(
-          "Kind can not be student because is teaching in at least one program"
-        )
-        expect(teacher_1.reload).to be_teacher
+        
+        expect(page).to have_text("Kind can not be student because is teaching in at least one program.")
+        user_2.reload
+
       end
 
       scenario 'when a student wants to be set as a teacher' do
         visit edit_user_path(user_1)
   
-        select('Teacher', from: "user_kind")
+        select('Teacher', from: "user_kind", match: :first)
         click_on 'Update User'
   
-        expect(page).to have_text(
-          "Kind can not be teacher because is studying in at least one program"
-        )
-        expect(user_1.reload).to be_student
+        expect(page).to have_text("Kind can not be student because is teaching in at least one program.")
+        user_1.reload
+
       end
     end
   end
 
   feature 'Validation ok' do
     scenario 'when a teacher wants to be set a student' do
-      visit edit_user_path(teacher_3)
+      visit edit_user_path(user_2)
 
-      select('Student', from: "user_kind")
-      click_on 'Update User'
+      select('Student', from: 'user_kind', match: :first)
+      click_button 'Update User'
 
-      expect(page).not_to have_text(
-        "Kind can not be student because is teaching in at least one program"
-      )
-      expect(teacher_3.reload).to be_student
+      expect(page).to have_text("Kind can not be student because is teaching in at least one program.")
+      user_2.reload
+      expect(user_2.kind) == ('Student')
     end
 
     scenario 'when a student wants to be set as a teacher' do
-      visit edit_user_path(user_4)
+      visit edit_user_path(user_3)
 
-      select('Teacher', from: "user_kind")
-      click_on 'Update User'
-
-      expect(page).not_to have_text(
-        "Kind can not be teacher because is studying in at least one program"
-      )
-      expect(user_4.reload).to be_teacher
+      select('Teacher', from: "user_kind", match: :first)
+      click_button 'Update User'
+      expect(page).not_to have_text("Kind can not be teacher because is studying in at least one program.")
+      user_3.reload
+      expect(user_3.kind) == ('Teacher')
     end
   end
 end

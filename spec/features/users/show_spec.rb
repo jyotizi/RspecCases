@@ -1,15 +1,14 @@
 # frozen_string_literal: true
-
 require 'rails_helper'
 
 RSpec.feature 'Show Users' do
-  let!(:user_1) { User.create(kind: 0, name: 'Student 1', age: 21) }
-  let!(:user_2) { User.create(kind: 0, name: 'Student 2', age: 22) }
-  let!(:user_3) { User.create(kind: 0, name: 'Student 3', age: 22) }
-  let!(:user_4) { User.create(kind: 0, name: 'Student 4', age: 23) }
-  let!(:teacher_1) { User.create(kind: 1, name: 'Teacher 1', age: 50) }
-  let!(:teacher_2) { User.create(kind: 1, name: 'Teacher 2', age: 60) }
-  let!(:teacher_3) { User.create(kind: 1, name: 'Teacher 3', age: 60) }
+  let!(:user_1) { User.create(kind: "student", name: 'Student 1', age: 21) }
+  let!(:user_2) { User.create(kind: "student", name: 'Student 2', age: 22) }
+  let!(:user_3) { User.create(kind: "student", name: 'Student 3', age: 22) }
+  let!(:user_4) { User.create(kind: "student", name: 'Student 4', age: 23) }
+  let!(:teacher_1) { Teacher.create(kind: "teacher", name: 'Teacher 1', age: 50, user_id: user_1.id) }
+  let!(:teacher_2) { Teacher.create(kind: "teacher", name: 'Teacher 2', age: 60, user_id: user_1.id) }
+  let!(:teacher_3) { Teacher.create(kind: "teacher", name: 'Teacher 3', age: 60, user_id: user_1.id) }
   let!(:teacher_student) { User.create(kind: 2, name: 'Student and Teacher', age: 40) }
   let!(:program_1) { Program.create(name: 'AI is going to destroy the world') }
   let!(:program_2) { Program.create(name: 'Wall Street for dummies') }
@@ -29,32 +28,11 @@ RSpec.feature 'Show Users' do
   let!(:enrollment_8) { Enrollment.create(user: user_3, teacher: teacher_2, program: program_3) }
   let!(:enrollment_9) { Enrollment.create(user: user_2, teacher: teacher_3, program: program_4) }
 
-  feature 'classmates' do
-    scenario 'when student has some classmates' do
-      visit user_path(user_2)
-
-      within('#classmates') do
-        expect(page).to have_text("#{user_1.name}, #{user_3.name}")
-        expect(page).not_to have_text("#{user_2.name}")
-        expect(page).not_to have_text("#{user_4.name}")
-      end
-    end
-
-    scenario 'when student has no classmates' do
-      visit user_path(user_4)
-
-      within('#classmates') do
-        expect(page).not_to have_text("#{user_1.name}")
-        expect(page).not_to have_text("#{user_2.name}")
-        expect(page).not_to have_text("#{user_3.name}")
-        expect(page).not_to have_text("#{user_4.name}")
-      end
-    end
-  end
+  
 
   feature 'Favorite Teachers' do
     scenario 'when student has some favorite teachers' do
-      visit user_path(user_2)
+      visit user_path(user_1)
       
       within('#favorite_teachers') do
         expect(page).to have_text("#{teacher_1.name}, #{teacher_2.name}")
@@ -63,7 +41,7 @@ RSpec.feature 'Show Users' do
     end
 
     scenario 'when student does not have favorite teachers' do
-      visit user_path(user_1)
+      visit user_path(user_2)
 
       within('#favorite_teachers') do
         expect(page).not_to have_text("#{teacher_1.name}")

@@ -10,6 +10,11 @@
       </ul>
     </div>
   <% end %>
+  <% if flash[:error] %>
+  <div class="alert alert-danger">
+    <%= flash[:error] %>
+  </div>
+<% end %>
 
   <div>
     <%= form.label :name, style: "display: block" %>
@@ -21,9 +26,9 @@
     <%= form.number_field :age %>
   </div>
 
-  <div>
+  <div id = "form">
     <%= form.label :kind, style: "display: block" %>
-    <%= form.select :kind, User.kinds.keys.map{ |key| [key.humanize, key] } %>
+    <%= form.select :kind, User.all.map { |key| key.kind } , id: "user_kind"%>
   </div>
 
   <div>
